@@ -1,14 +1,14 @@
 package part2primer
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 
 import scala.concurrent.Future
 
 object FirstPrinciples extends App{
   implicit val system: ActorSystem = ActorSystem("FirstPrinciples")
-  val materializer = ActorMaterializer()
+  implicit val mat: Materializer = Materializer(system)
 
   // sources
   val source = Source(1 to 10)
@@ -19,7 +19,7 @@ object FirstPrinciples extends App{
   //  graph.run() // implicit materializer: ActorMaterializer
 
   // flows transform elements
-  val flow = Flow[Int].map(x => x + 1)
+  val flow = Flow[Int].map((x: Int) => x + 1)
   val sourceWithFlow = source.via(flow)
   val flowWithSink = flow.to(sink)
 
@@ -45,10 +45,10 @@ object FirstPrinciples extends App{
   val theMostBoringSink = Sink.ignore
   val foreachSink = Sink.foreach[String](println)
   val headSink = Sink.head[Int] // retrieves head and then closes the stream
-  val foldSink = Sink.fold[Int, Int](0)((a, b) => a + b)
+  val foldSink = Sink.fold[Int, Int](0)((a: Int, b: Int) => a + b)
 
   // flows - usually mapped to collection operators
-  val mapFlow = Flow[Int].map(_ * 2)
+  val mapFlow = Flow[Int].map((_: Int) * 2)
   val takeFlow = Flow[Int].take(5) // turn to a finite stream
   // drop, filter
   // NOT have flatMap or flatMap like operators
@@ -58,7 +58,7 @@ object FirstPrinciples extends App{
   //  doubleFlowGraph.run()
 
   // syntactic sugars
-  val mapSource = Source(1 to 10).map(_ * 2) // Source(1 to 10).via(Flow[Int].map(x => x * 2))
+  val mapSource = Source(1 to 10).map((_: Int) * 2) // Source(1 to 10).via(Flow[Int].map(x => x * 2))
   // run streams directly
   //  mapSource.runForeach(println) // mapSource.to(Sink.foreach[Int](println).run()
 
@@ -68,7 +68,7 @@ object FirstPrinciples extends App{
    */
   val names: List[String] = List("Alice", "Bob", "Charlie", "David", "Martin", "AkkaStreams")
   val nameSource = Source(names)
-  val longNameFlow = Flow[String].filter(_.length > 5)
+  val longNameFlow = Flow[String].filter((_: String).length > 5)
   val limitFlow = Flow[String].take(2)
   val nameSink = Sink.foreach[String](println)
 

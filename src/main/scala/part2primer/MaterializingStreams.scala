@@ -1,14 +1,14 @@
 package part2primer
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 
 import scala.util.{Failure, Success}
 
 object MaterializingStreams extends App {
   implicit val system: ActorSystem = ActorSystem("MaterializingStreams")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val mat: Materializer = Materializer(system)
   import system.dispatcher
 
   val simpleGraph = Source(1 to 10).to(Sink.foreach(println))

@@ -1,12 +1,12 @@
 package part2primer
 
 import akka.actor.{Actor, ActorSystem, Props}
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 
 object OperatorFusion extends App {
   implicit val system: ActorSystem = ActorSystem("OperatorFusion")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val mat: Materializer = Materializer(system)
 
   val simpleSource = Source(1 to 1000)
   val simpleFlow = Flow[Int].map((_: Int) + 1)

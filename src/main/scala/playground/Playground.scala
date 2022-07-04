@@ -9,7 +9,7 @@ import scala.util.Try
 
 object Playground extends App {
   implicit val system: ActorSystem = ActorSystem("Playground")
-  implicit val materializer: Materializer.type = Materializer
+  implicit val mat: Materializer = Materializer(system)
   import system.dispatcher
 
   val source = Source(1 to 10)
