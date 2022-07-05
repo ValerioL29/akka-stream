@@ -12,6 +12,7 @@ object GraphMaterializedValues extends App {
 
   implicit val system: ActorSystem = ActorSystem("GraphMaterializedValues")
   implicit val mat: Materializer = Materializer(system)
+  import system.dispatcher
 
   val wordSource = Source(List(
     "Akka",
@@ -55,7 +56,6 @@ object GraphMaterializedValues extends App {
     }
   )
 
-  import system.dispatcher
   //  val shortStringCountFuture =
   //    wordSource
   //      .toMat(complexWordSink)(Keep.right)
