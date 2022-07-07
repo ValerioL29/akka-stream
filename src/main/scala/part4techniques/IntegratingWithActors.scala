@@ -26,12 +26,12 @@ object IntegratingWithActors {
     }
   }
 
-  val simpleActor = system.actorOf(Props[SimpleActor], "simpleActor")
-  val numbersSource = Source(1 to 10)
+  val simpleActor: ActorRef = system.actorOf(Props[SimpleActor], "simpleActor")
+  val numbersSource: Source[Int, NotUsed] = Source(1 to 10)
 
   // actor as a flow
   implicit val timeout: Timeout = Timeout(2 seconds)
-  val actorBasedFlow = Flow[Int].ask[Int](parallelism = 4)(simpleActor)
+  val actorBasedFlow: Flow[Int, Int, NotUsed] = Flow[Int].ask[Int](parallelism = 4)(simpleActor)
 
   //  numbersSource.via(actorBasedFlow).to(Sink.ignore).run()
   //  numbersSource.ask[Int](parallelism = 4)(simpleActor).to(Sink.ignore).run()
@@ -39,8 +39,8 @@ object IntegratingWithActors {
   /**
    * Actor as a source
    */
-    val actorPoweredSource = Source.actorRef[Int](bufferSize = 10, overflowStrategy = OverflowStrategy.dropHead)
-        val materializedActorRef =
+    val actorPoweredSource: Source[Int, ActorRef] = Source.actorRef[Int](bufferSize = 10, overflowStrategy = OverflowStrategy.dropHead)
+        val materializedActorRef: ActorRef =
           actorPoweredSource
             .to(Sink.foreach[Int]((num: Int) =>
                 println(s"Actor powered flow got number: $num")

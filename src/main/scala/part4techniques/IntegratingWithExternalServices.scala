@@ -6,6 +6,7 @@ import akka.dispatch.MessageDispatcher
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.Timeout
+import akka.pattern.{ask,pipe}
 
 import java.util.Date
 import scala.concurrent.Future
@@ -22,7 +23,7 @@ object PrivateExecutionContext {
 object IntegratingWithExternalServices {
   import PrivateExecutionContext._
 
-  def genericExternalService[A, B](element: A): Future[B] = ???
+  // def genericExternalService[A, B](element: A): Future[B] = ???
 
   // example: simplified PagerDuty
   case class PagerEvent(application: String, description: String, date: Date)
@@ -57,7 +58,7 @@ object IntegratingWithExternalServices {
 
     override def receive: Receive = {
       case pagerEvent: PagerEvent =>
-        sender() ! processEvent(pagerEvent)
+        pipe(processEvent(pagerEvent)) to sender()
     }
   }
 
@@ -71,7 +72,6 @@ object IntegratingWithExternalServices {
       Sink.foreach[String]((email: String) => println(s"Successfully sent notification to $email"))
 
   def demoPagerService(): Unit = {
-    import akka.pattern.ask
     implicit val timeout: Timeout = Timeout(3 seconds)
 
     val pagerActor: ActorRef = system.actorOf(Props[PagerActor], "pagerActor")
