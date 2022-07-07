@@ -9,7 +9,7 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-object IntegratingWithActors extends App {
+object IntegratingWithActors {
 
   implicit val system: ActorSystem = ActorSystem("IntegratingWithActors")
   implicit val mat: Materializer = Materializer(system)
@@ -76,17 +76,24 @@ object IntegratingWithActors extends App {
         log.info(s"Message: $message - has come to its final resting point.")
         sender() ! StreamAck
     }
-    val destinationActor: ActorRef = system.actorOf(Props[DestinationActor], "destinationActor")
+  }
 
-    val actorPoweredSink: Sink[Int, NotUsed] = Sink.actorRefWithBackpressure[Int](
-      destinationActor,
-      onInitMessage = StreamInit,
-      onCompleteMessage = StreamComplete,
-      ackMessage = StreamAck,
-      onFailureMessage = (throwable: Throwable) => StreamFail(throwable) // optional
-    )
+  val destinationActor: ActorRef = system.actorOf(Props[DestinationActor], "destinationActor")
 
-     Source(1 to 10).to(actorPoweredSink).run()
-    // Sink.actorRef() not recommended, as it does not provide BACKPRESSURE
+  val actorPoweredSink: Sink[Int, NotUsed] = Sink.actorRefWithBackpressure[Int](
+    destinationActor,
+    onInitMessage = StreamInit,
+    onCompleteMessage = StreamComplete,
+    ackMessage = StreamAck,
+    onFailureMessage = (throwable: Throwable) => StreamFail(throwable) // optional
+  )
+
+  // Sink.actorRef() not recommended, as it does not provide BACKPRESSURE
+
+  def main(args: Array[String]): Unit = {
+    Source(1 to 10).to(actorPoweredSink).run()
+
+    Thread.sleep(1000)
+    system.terminate()
   }
 }
