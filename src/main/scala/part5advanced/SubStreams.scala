@@ -88,7 +88,7 @@ object SubStreams {
     val flatMergeFuture: Future[Done] = simpleSource.log("flatMap-Merge")
       .flatMapMerge(2, (x: Int) => Source(x to (3 * x)))
       .runForeach(println)
-    
+
     flatMergeFuture.onComplete {
       case Success(_) => println(s"Merge flatten finished.")
       case Failure(exception) => println(s"Failed: $exception")
